@@ -1,0 +1,47 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch api (NestJS)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:dev"],
+      "cwd": "${workspaceFolder}/apps/api",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Launch client (Vue/Vite) in browser",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/apps/client",
+      "preLaunchTask": "npm run dev (client)",
+      "sourceMaps": true
+    },
+    {
+      "name": "Attach to api (Docker)",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "address": "localhost",
+      "localRoot": "${workspaceFolder}/apps/api",
+      "remoteRoot": "/app/apps/api",
+      "preLaunchTask": "docker compose up",
+      "sourceMaps": true,
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch full stack (API + Client)",
+      "configurations": ["Launch api (NestJS)", "Launch client (Vue/Vite) in browser"]
+    },
+    {
+      "name": "Attach full stack (API(Docker) + Client)",
+      "configurations": ["Attach to api (Docker)", "Launch client (Vue/Vite) in browser"]
+    }
+  ]
+}

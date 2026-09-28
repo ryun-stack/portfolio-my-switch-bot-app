@@ -1,0 +1,206 @@
+<mxfile host="65bd71144e">
+    <diagram id="overview" name="1. 全体アーキテクチャ">
+        <mxGraphModel dx="607" dy="478" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="620" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;" value="自作スイッチボット 全体アーキテクチャ（Ver1.0 = Web SPA + NestJS API + Azure、Ver2.0 = ラズパイ含む）" vertex="1">
+                    <mxGeometry height="30" width="1100" x="40" y="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="entra" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=center;verticalAlign=middle;fontSize=13;" value="Microsoft Entra ID&lt;br&gt;(ワークフォーステナント)&lt;br&gt;&lt;br&gt;- B2Bゲスト招待&lt;br&gt;- JWKS / JWT発行" vertex="1">
+                    <mxGeometry height="140" width="260" x="60" y="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="client" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontSize=13;" value="Web SPA (Vue.js 3 + Vite)&#xa;Azure Static Web Apps&#xa;&#xa;- @azure/msal-browser&#xa;- OAuth2 Auth Code + PKCE&#xa;- switchApi.ts (fetch)" vertex="1">
+                    <mxGeometry height="160" width="260" x="60" y="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=center;verticalAlign=middle;fontSize=13;" value="NestJS API (コンテナ)&#xa;Azure Container Apps&#xa;&#xa;Onion Architecture&#xa;（詳細は「2. オニオン&#xa;アーキテクチャ」ページ参照）&#xa;&#xa;POST /switch/press&#xa;GET /switch/status/:id" vertex="1">
+                    <mxGeometry height="220" width="280" x="460" y="260" as="geometry"/>
+                </mxCell>
+                <mxCell id="queue" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=middle;fontSize=13;" value="Azure Queue Storage&#xa;&#xa;{ requestId, action,&#xa;  issuedAt }" vertex="1">
+                    <mxGeometry height="130" width="240" x="860" y="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="table" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=center;verticalAlign=middle;fontSize=13;" value="Azure Table Storage&#xa;&#xa;SwitchRequestStatus:&#xa;pending/done/failed&#xa;(requestId, executorId,&#xa; action, issuedAt, updatedAt)&#xa;&#xa;Users: (id, emailAddress)" vertex="1">
+                    <mxGeometry height="160" width="240" x="860" y="320" as="geometry"/>
+                </mxCell>
+                <mxCell id="rpi" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;verticalAlign=middle;fontSize=13;dashed=1;" value="Raspberry Pi Zero WH (Go)&#xa;systemd常駐 [Ver2.0以降]&#xa;&#xa;- Queueをポーリング&#xa;- サーボ駆動&#xa;- 完了後にステータス更新&#xa;  (API経由)" vertex="1">
+                    <mxGeometry height="160" width="280" x="1180" y="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="servo" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=center;verticalAlign=middle;fontSize=13;dashed=1;" value="SG90 サーボモーター&#xa;（物理スイッチ押下）&#xa;[Ver2.0以降]" vertex="1">
+                    <mxGeometry height="100" width="280" x="1180" y="340" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" target="entra" value="① ログイン (Auth Code+PKCE)">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;exitX=1;exitY=0.4;entryX=0;entryY=0.35;" target="api" value="② APIリクエスト&#xa;Authorization: Bearer &lt;JWT&gt;">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;dashed=1;exitX=0;exitY=0.15;entryX=1;entryY=0.5;" target="entra" value="③ JWT検証 (JWKS取得・&#xa;署名/iss/aud検証)">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="400" y="293"/>
+                            <mxPoint x="400" y="150"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e4" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;exitX=1;exitY=0.25;entryX=0;entryY=0.5;" target="queue" value="④ enqueue&#xa;(PressSwitchCommand)">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;exitX=1;exitY=0.75;entryX=0;entryY=0.5;" target="table" value="④&#39; save/find&#xa;(SwitchRequest, User)">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6" edge="1" parent="1" source="rpi" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;dashed=1;exitX=0;exitY=0.3;entryX=1;entryY=0.3;" target="queue" value="⑤ poll">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" edge="1" parent="1" source="rpi" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;dashed=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="servo" value="⑥ 駆動指示">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e8" edge="1" parent="1" source="rpi" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;dashed=1;exitX=0.3;exitY=0;entryX=0.3;entryY=0;" target="api" value="⑦ ステータス更新 (done/failed, API経由)">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1264" y="50"/>
+                            <mxPoint x="544" y="50"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e9" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=11;exitX=0.3;exitY=1;entryX=0.5;entryY=1;" target="client" value="⑧ ポーリングで結果取得&#xa;GET /switch/status/:id">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="544" y="540"/>
+                            <mxPoint x="190" y="540"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="legend" parent="1" style="text;html=1;fontSize=12;fontStyle=2;align=left;" value="点線 = Ver2.0以降で実装予定（本リポジトリはVer1.0：クライアント〜API〜Queue/Table Storageまで実装済み）" vertex="1">
+                    <mxGeometry height="30" width="1000" x="60" y="560" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="onion" name="2. オニオンアーキテクチャ (NestJS API)">
+        <mxGraphModel dx="679" dy="534" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1300" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="otitle" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=left;" value="NestJS API - オニオンアーキテクチャ（apps/api/src）" vertex="1">
+                    <mxGeometry height="30" width="700" x="40" y="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="ringPresInfra" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;verticalAlign=top;align=center;fontSize=13;fontStyle=1;spacingTop=10;" value="Presentation / Infrastructure（外側リング：フレームワーク・外部I/Oに依存してよい層）" vertex="1">
+                    <mxGeometry height="1120" width="1700" x="50" y="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="ringApp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;verticalAlign=top;align=center;fontSize=13;fontStyle=1;spacingTop=10;" value="Application（ユースケース層：Domainのみに依存）" vertex="1">
+                    <mxGeometry height="620" width="1200" x="300" y="380" as="geometry"/>
+                </mxCell>
+                <mxCell id="ringDomain" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;align=center;fontSize=13;fontStyle=1;spacingTop=8;" value="Domain（中心：何にも依存しない）" vertex="1">
+                    <mxGeometry height="260" width="680" x="560" y="560" as="geometry"/>
+                </mxCell>
+                <mxCell id="dom1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=12;" value="SwitchRequest（エンティティ）&#xa;requestId, executorId,&#xa;action, status, issuedAt, updatedAt" vertex="1">
+                    <mxGeometry height="80" width="300" x="580" y="615" as="geometry"/>
+                </mxCell>
+                <mxCell id="dom2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=12;" value="User（エンティティ）&#xa;id, emailAddress" vertex="1">
+                    <mxGeometry height="80" width="280" x="940" y="615" as="geometry"/>
+                </mxCell>
+                <mxCell id="dom3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=12;" value="Value Objects&#xa;Uuid / EmailAddress&#xa;（形式バリデーション。OData injection対策）" vertex="1">
+                    <mxGeometry height="90" width="300" x="580" y="710" as="geometry"/>
+                </mxCell>
+                <mxCell id="dom4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=12;" value="Repository ports (interface)&#xa;SwitchRequestRepository&#xa;UserRepository" vertex="1">
+                    <mxGeometry height="90" width="280" x="940" y="710" as="geometry"/>
+                </mxCell>
+                <mxCell id="app1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Commands / Queries&#xa;PressSwitchCommand&#xa;GetSwitchStatusQuery" vertex="1">
+                    <mxGeometry height="90" width="300" x="650" y="430" as="geometry"/>
+                </mxCell>
+                <mxCell id="app2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Handlers&#xa;PressSwitchCommandHandler&#xa;GetSwitchStatusQueryHandler" vertex="1">
+                    <mxGeometry height="90" width="300" x="1000" y="430" as="geometry"/>
+                </mxCell>
+                <mxCell id="app3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Mapper&#xa;toQueueMessage()&#xa;（Domain → shared-types契約への変換）" vertex="1">
+                    <mxGeometry height="90" width="300" x="650" y="850" as="geometry"/>
+                </mxCell>
+                <mxCell id="app4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Ports&#xa;SwitchQueueSender (interface)" vertex="1">
+                    <mxGeometry height="90" width="300" x="1000" y="850" as="geometry"/>
+                </mxCell>
+                <mxCell id="pres1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="Controller&#xa;SwitchController&#xa;(@UseGuards)" vertex="1">
+                    <mxGeometry height="100" width="300" x="100" y="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="pres3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="DI Composition Root&#xa;mediator.provider.ts&#xa;repository.provider.ts&#xa;queue.provider.ts&#xa;（Symbolトークン + Provider）" vertex="1">
+                    <mxGeometry height="110" width="300" x="1300" y="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="pres2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="Guards&#xa;EntraIdAuthGuard (JWT検証, JWKS)&#xa;RegisteredUserGuard (allowlist照合)" vertex="1">
+                    <mxGeometry height="120" width="300" x="100" y="1050" as="geometry"/>
+                </mxCell>
+                <mxCell id="infra1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="TableStorageSwitchRequestRepository&#xa;TableStorageUserRepository&#xa;(@azure/data-tables)" vertex="1">
+                    <mxGeometry height="100" width="300" x="1300" y="1050" as="geometry"/>
+                </mxCell>
+                <mxCell id="infra2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="QueueStorageSender&#xa;(@azure/storage-queue)" vertex="1">
+                    <mxGeometry height="90" width="230" x="60" y="650" as="geometry"/>
+                </mxCell>
+                <mxCell id="d1" edge="1" parent="1" source="pres1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;exitX=0.75;exitY=1;entryX=0;entryY=0.5;" target="app1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="325" y="475"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="d2" edge="1" parent="1" source="pres3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;exitX=0.25;exitY=1;entryX=1;entryY=0.5;" target="app2">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1375" y="475"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="d3" edge="1" parent="1" source="app2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="dom1" value="依存">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="910" y="475"/>
+                            <mxPoint x="910" y="655"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="d4" edge="1" parent="1" source="app2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;exitX=1;exitY=1;entryX=1;entryY=0.75;" target="dom4" value="依存">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1310" y="520"/>
+                            <mxPoint x="1310" y="777"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="d5" edge="1" parent="1" source="app3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;exitX=0;exitY=0.5;entryX=0;entryY=0.7;" target="dom1" value="依存">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="520" y="895"/>
+                            <mxPoint x="520" y="671"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="d6" edge="1" parent="1" source="infra1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;fontSize=10;exitX=0.3;exitY=0;entryX=1;entryY=0.25;" target="dom4" value="implements">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1390" y="733"/>
+                            <mxPoint x="1320" y="733"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="d7" edge="1" parent="1" source="infra2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;fontSize=10;exitX=1;exitY=0.5;" value="implements">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="290" y="1020"/>
+                            <mxPoint x="1150" y="1020"/>
+                        </Array>
+                        <mxPoint x="1150" y="940" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="d8" edge="1" parent="1" source="pres2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="dom4" value="依存 (UserRepository)">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="400.06" y="1116.12"/>
+                            <mxPoint x="969.94" y="1116.12"/>
+                        </Array>
+                        <mxPoint x="200" y="1122" as="sourcePoint"/>
+                        <mxPoint x="1020.0000000000002" y="800" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="note" parent="1" style="text;html=1;fontSize=12;align=left;" value="矢印は依存の向き（外側→内側）。実線=直接の型依存、点線=Infrastructureがinterface(ports)を実装（DI経由で注入）。&#xa;Infrastructure/Presentationは互いに依存せず、どちらもDomain/Applicationが定義したinterface越しにのみ繋がる。" vertex="1">
+                    <mxGeometry height="50" width="1400" x="60" y="1190" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

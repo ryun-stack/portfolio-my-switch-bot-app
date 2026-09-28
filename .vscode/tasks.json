@@ -1,0 +1,73 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "label": "npm build (api)",
+      "command": "npm run build",
+      "problemMatcher": "$tsc",
+      "options": {
+        "cwd": "${workspaceFolder}/apps/api"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "npm start:dev (api)",
+      "command": "npm run start:dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/apps/api"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "npm install (api)",
+      "command": "npm install",
+      "options": {
+        "cwd": "${workspaceFolder}/apps/api"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "npm install (client)",
+      "command": "npm install",
+      "options": {
+        "cwd": "${workspaceFolder}/apps/client"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "npm run dev (client)",
+      "command": "npm run dev",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "ready in|Local:"
+        }
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/apps/client"
+      }
+    },
+    {
+      "type": "shell",
+      "label": "docker compose up",
+      "command": "docker compose up -d",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

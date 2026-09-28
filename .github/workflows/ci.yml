@@ -1,0 +1,32 @@
+name: CI
+
+# Runs on every push/PR touching main so build/test failures are caught
+# before merge (ADR.md 6章 Phase 3). Uses the same npm scripts a developer
+# would run locally (README.md 品質・テスト戦略), so this workflow can't
+# drift from what's documented.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (shared-types → api → client)
+        run: npm run build
+
+      - name: Test (shared-types, api)
+        run: npm test

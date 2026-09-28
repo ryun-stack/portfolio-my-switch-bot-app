@@ -1,0 +1,9 @@
+{
+    "js/ts.tsdk.path": "node_modules\\typescript\\lib",
+    "azurite.skipApiVersionCheck": true,
+    "debug.internalConsoleOptions": "neverOpen",
+    "jest.virtualFolders": [
+        { "name": "api", "rootPath": "apps/api" },
+        { "name": "shared-types", "rootPath": "packages/shared-types" }
+    ]
+}

@@ -1,0 +1,24 @@
+.git
+.github
+.vscode
+node_modules
+**/node_modules
+dist
+**/dist
+*.log
+
+# Azurite local emulator artifacts (ADR.md 3.7) — never needed in the image
+AzuriteConfig
+__azurite_db*__.json
+__blobstorage__/
+__queuestorage__/
+
+# Local secrets — never baked into the image; container platforms inject
+# real env vars at runtime instead (see apps/api/.env.example)
+.env
+.env.*
+!.env.example
+
+# Docs/session artifacts not needed for the build
+*.md
+Architecture.drawio

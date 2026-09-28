@@ -1,0 +1,13 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "3000:3000"
+      - "9229:9229" # Node inspector, for VS Code "Attach to api (Docker)"
+    env_file:
+      - apps/api/.env
+    environment:
+      PORT: 3000
+      NODE_OPTIONS: "--inspect=0.0.0.0:9229"

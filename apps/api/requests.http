@@ -1,0 +1,16 @@
+### 変数定義
+@baseUrl = http://localhost:3000/api
+# GET /switch/status/{requestId} のテストで使う requestId は、
+# 下の pressSwitch のレスポンスに含まれる requestId を貼り替えてください。
+@requestId = 65b5c886-a986-453c-ad18-327624e84bcc
+
+### スイッチ押下 (POST /api/switch/press)
+POST {{baseUrl}}/switch/press
+Content-Type: application/json
+
+###
+
+### スイッチ状態取得 (GET /api/switch/status/{requestId})
+GET {{baseUrl}}/switch/status/{{requestId}}
+
+###
